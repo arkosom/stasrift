@@ -1,0 +1,6 @@
+fields:
+  - name: occurred_at
+  - name: processed_at
+  - name: amount
+  - name: discount_pct
+    nullable: true

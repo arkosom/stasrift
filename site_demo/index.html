@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stasrift</title>
+<style>
+body{margin:0;background:#08131f;color:#eaf2f8;font-family:Inter,system-ui,sans-serif}
+main{max-width:900px;margin:auto;padding:64px 24px}
+h1{font-size:56px;margin:0 0 8px}
+p{color:#a8bac8;line-height:1.5}
+pre{background:#0d1c2b;border:1px solid #1e3448;border-radius:12px;padding:20px;overflow:auto}
+.bad{color:#ff7a59}.good{color:#7ddc8a}.muted{color:#7f93a6}
+.tag{display:inline-block;padding:4px 8px;border:1px solid #36516a;border-radius:999px;font-size:12px}
+</style>
+</head>
+<body>
+<main>
+<span class="tag">Stasrift 1.0 RC2</span>
+<h1>Structure stayed compatible.<br>Meaning did not.</h1>
+<p>Stasrift checks declared semantic meaning across versions, then blocks changes that ordinary schema compatibility can miss.</p>
+
+<h2>Baseline schema check</h2>
+<pre class="good">PASS: field names and physical types unchanged</pre>
+
+<h2>Stasrift</h2>
+<pre><span class="bad">INCOMPATIBLE</span>
+
+occurred_at.time_axis
+{event_time} → {processing_time}
+
+Reason
+Same timestamp shape. Different declared meaning.</pre>
+
+<h2>CLI</h2>
+<pre>stasrift diff --old v1.yaml --new v2.yaml
+stasrift scan --repo .
+stasrift suggest --evidence evidence.json
+stasrift review --suggestions suggestions.json</pre>
+
+<p class="muted">Local by design. No network required. Suggestions never write meaning automatically.<br><br><strong>J = 0 principle:</strong> unchanged according to a declared observation contract.</p>
+</main>
+</body>
+</html>

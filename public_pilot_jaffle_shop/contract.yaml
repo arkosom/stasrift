@@ -1,0 +1,4 @@
+stasrift_format: stasrift-contract-v1
+fields:
+  - name: amount
+    type: double

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 220" role="img" aria-labelledby="title desc">
+<title id="title">Stasrift terminal wordmark</title>
+<desc id="desc">Cyan prompt arrow followed by the Stasrift wordmark in navy monospace lettering.</desc>
+<rect width="980" height="220" fill="white"/>
+<path d="M70 70 L125 110 L70 150" fill="none" stroke="#22D3EE" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="160" y="145" fill="#1B2A4A" font-size="102" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" letter-spacing="2">stasrift</text>
+<rect x="622" y="48" width="42" height="10" rx="5" fill="#22D3EE"/>
+</svg>

@@ -1,0 +1,7 @@
+fields:
+  - name: occurred_at
+  - name: processed_at
+  - name: ship_at
+  - name: amount_usd
+  - name: discount_pct
+    nullable: true

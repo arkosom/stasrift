@@ -1,0 +1,15 @@
+models:
+  - name: orders
+    semantic_model:
+      enabled: true
+      agg_time_dimension: ordered_at
+    columns:
+      - name: order_total
+        description: The total amount of the order in USD including tax.
+        dimension:
+          type: categorical
+      - name: ordered_at
+        description: The timestamp the order was placed at.
+        granularity: day
+        dimension:
+          type: time

@@ -1,0 +1,6 @@
+stasrift_format: stasrift-contract-v1
+fields:
+  - name: ordered_at
+    type: timestamp
+  - name: order_total
+    type: double

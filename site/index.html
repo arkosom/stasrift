@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Stasrift checks whether data still means the same thing across versions.">
+<title>Stasrift — semantic compatibility for data contracts</title>
+<link rel="icon" href="assets/stasrift-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="Stasrift home">
+    <img src="assets/stasrift-icon.svg" alt="">
+    <span>stasrift</span>
+  </a>
+  <nav>
+    <a href="#proof">Proof</a>
+    <a href="#how">How it works</a>
+    <a href="#install">Install</a>
+    <a href="#origin">Origin</a>
+  </nav>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="eyebrow">Stasrift 1.0</div>
+  <h1>Structure stayed compatible.<br><span>Meaning did not.</span></h1>
+  <p class="lede">Stasrift checks whether declared data meaning changed across versions, even when the schema still passes.</p>
+  <p class="trust">Local CLI · No server · No accounts · Human-reviewed</p>
+  <div class="actions">
+    <a class="button primary" href="#install">Try the CLI</a>
+    <a class="button ghost" href="#proof">See the proof</a>
+  </div>
+  <div class="terminal">
+<pre><code><span class="prompt">$</span> stasrift diff --old v1.yaml --new v2.yaml
+
+<span class="bad">INCOMPATIBLE</span>
+
+occurred_at.time_axis
+{event_time} → {processing_time}
+
+Reason
+Same timestamp shape. Different declared meaning.</code></pre>
+  </div>
+</section>
+
+<section id="proof" class="section">
+  <div class="section-kicker">The proof</div>
+  <h2>A schema can pass while meaning breaks.</h2>
+  <div class="compare-grid">
+    <article class="card">
+      <h3>Schema compatibility</h3>
+      <div class="result good">PASS</div>
+      <p>Field names and physical types are unchanged.</p>
+      <pre><code>occurred_at: timestamp</code></pre>
+    </article>
+    <article class="card">
+      <h3>Stasrift</h3>
+      <div class="result bad">INCOMPATIBLE</div>
+      <p>The type stayed the same, but the declared time axis changed.</p>
+      <pre><code>event_time → processing_time</code></pre>
+    </article>
+  </div>
+</section>
+
+<section id="how" class="section">
+  <div class="section-kicker">How it works</div>
+  <h2>Local evidence. Human decisions. Explicit compatibility.</h2>
+  <div class="steps">
+    <div><span>1</span><h3>Scan</h3><p>Read local SQL, contracts, dbt refs, and documentation.</p></div>
+    <div><span>2</span><h3>Suggest</h3><p>Produce deterministic suggestions, questions, or conflicts.</p></div>
+    <div><span>3</span><h3>Review</h3><p>A human confirms, edits, or skips. Suggestions never write automatically.</p></div>
+    <div><span>4</span><h3>Diff</h3><p>Return UNCHANGED, NARROWED, WIDENED, or INCOMPATIBLE.</p></div>
+  </div>
+</section>
+
+<section id="install" class="section">
+  <div class="section-kicker">Install</div>
+  <h2>One local CLI.</h2>
+  <div class="terminal">
+<pre><code><span class="prompt">$</span> python -m pip install ./stasrift-1.0.0-py3-none-any.whl
+<span class="prompt">$</span> stasrift --version
+stasrift 1.0.0
+
+<span class="prompt">$</span> stasrift doctor --repo .
+<span class="prompt">$</span> stasrift scan --repo . --contract contract.yaml
+<span class="prompt">$</span> stasrift suggest --evidence .semcheck/evidence.json
+<span class="prompt">$</span> stasrift review --suggestions .semcheck/suggestions.json --contract contract.yaml
+<span class="prompt">$</span> stasrift diff --old old.yaml --new new.yaml</code></pre>
+  </div>
+  <p class="note">Requires Python 3.10 or newer. <a href="https://github.com/arkosom/stasrift/releases/tag/v1.0.0">Download the v1.0.0 wheel from GitHub</a>, then run the install command from your download folder. Stasrift is not yet published to PyPI.</p>
+  <p class="note"><a href="https://github.com/arkosom/stasrift#readme">Read the documentation</a> · <a href="https://github.com/arkosom/stasrift">View the source on GitHub</a></p>
+</section>
+
+<section id="origin" class="section origin">
+  <div>
+    <div class="section-kicker">Origin</div>
+    <h2>Inspired by J = 0.</h2>
+    <p>Stasrift grew from the Jameson Zero Condition: the idea that “unchanged” only has meaning relative to what is being observed and compared.</p>
+    <p>The software does not claim new science. It turns that discipline into a practical question for data systems: <strong>unchanged according to what?</strong></p>
+  </div>
+  <img src="assets/stasrift-icon.svg" alt="Stasrift split zero icon">
+</section>
+</main>
+
+<footer>
+  <span>Inspired by J = 0, the Jameson Zero Condition. Built by Arkosom.</span>
+  <span>Local by design · No server required</span>
+</footer>
+</body>
+</html>

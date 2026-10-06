@@ -1,0 +1,4 @@
+fields:
+  - name: occurred_at
+    sem:
+      time_axis: [event_time]

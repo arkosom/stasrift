@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 420" role="img" aria-labelledby="title desc">
+<title id="title">Stasrift primary lockup</title>
+<desc id="desc">Split zero icon next to the Stasrift wordmark.</desc>
+<rect width="1280" height="420" fill="white"/>
+<rect x="40" y="40" width="340" height="340" rx="74" fill="#1B2A4A"/>
+<circle cx="210" cy="210" r="90" fill="none" stroke="#FFFFFF" stroke-width="38"/>
+<rect x="203" y="112" width="14" height="196" rx="7" fill="#22D3EE"/>
+<text x="450" y="252" fill="#1B2A4A" font-size="132" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" letter-spacing="2">stasrift</text>
+<rect x="1044" y="120" width="48" height="12" rx="6" fill="#22D3EE"/>
+</svg>

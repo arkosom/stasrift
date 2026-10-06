@@ -1,0 +1,4 @@
+fields:
+  - name: discount_pct
+    sem:
+      absent: [zero_equivalent]

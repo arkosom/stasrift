@@ -1,0 +1,14 @@
+name: stasrift
+on:
+  pull_request:
+  push:
+jobs:
+  semantic-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -e .
+      - run: stasrift validate --contract examples/orders.stasrift.yaml

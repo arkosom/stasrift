@@ -1,0 +1,7 @@
+fields:
+  - name: occurred_at
+    type: timestamp
+    sem:
+      time_axis: [processing_time]
+  - name: amount
+    type: double

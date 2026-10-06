@@ -1,0 +1,4 @@
+fields:
+  - name: occurred_at
+  - name: processed_at
+  - name: amount

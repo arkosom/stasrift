@@ -1,0 +1,21 @@
+{
+  "contract": "contract.yaml",
+  "contract_sha256": "86e0616c50e5f7d469594b5178a65f065ccc5db43f231032bb3dbe74dfc8e0a4",
+  "fields": [
+    {
+      "evidence": [
+        {
+          "attribute": "unit",
+          "description": "output expression appears to convert cents to a major currency unit; currency is not inferable",
+          "source": "models/staging/stg_payments.sql:9",
+          "supports": "question",
+          "type": "lineage"
+        }
+      ],
+      "name": "amount"
+    }
+  ],
+  "format": "stasrift-evidence-v2",
+  "parse_errors": [],
+  "repo": "."
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stasrift.com/schema/stasrift-contract-v1.schema.json",
+  "title": "Stasrift Contract v1",
+  "type": "object",
+  "required": [
+    "stasrift_format",
+    "fields"
+  ],
+  "properties": {
+    "stasrift_format": {
+      "const": "stasrift-contract-v1"
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {},
+          "nullable": {
+            "type": "boolean"
+          },
+          "sem": {
+            "type": "object",
+            "properties": {
+              "time_axis": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "enum": [
+                    "event_time",
+                    "processing_time",
+                    "ingestion_time",
+                    "valid_time",
+                    "transaction_time",
+                    "snapshot_time",
+                    "not_temporal"
+                  ]
+                }
+              },
+              "unit": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "absent": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "enum": [
+                    "unknown",
+                    "not_applicable",
+                    "withheld",
+                    "zero_equivalent",
+                    "not_yet_computed"
+                  ]
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,14 @@
+stasrift_format: stasrift-contract-v1
+fields:
+  - name: occurred_at
+    type: timestamp
+    sem:
+      time_axis: [event_time]
+  - name: amount
+    type: double
+    sem:
+      unit: [USD]
+  - name: discount_pct
+    nullable: true
+    sem:
+      absent: [unknown]

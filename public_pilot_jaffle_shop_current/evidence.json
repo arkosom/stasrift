@@ -1,0 +1,40 @@
+{
+  "contract": "contract.yaml",
+  "contract_sha256": "8a10bbc04c1154875fbffbf136f775570d98a5fe79d3ceab98be29caec05286f",
+  "fields": [
+    {
+      "evidence": [
+        {
+          "attribute": "unit",
+          "description": "dbt documentation explicitly names currency USD",
+          "source": "models/marts/orders.yml",
+          "supports": "USD",
+          "type": "documentation"
+        }
+      ],
+      "name": "order_total"
+    },
+    {
+      "evidence": [
+        {
+          "attribute": "time_axis",
+          "description": "dbt documentation describes when the business event occurred",
+          "source": "models/marts/orders.yml",
+          "supports": "event_time",
+          "type": "documentation"
+        },
+        {
+          "attribute": "time_axis",
+          "description": "dbt Semantic Layer marks this column as a time dimension; exact time axis is not declared",
+          "source": "models/marts/orders.yml",
+          "supports": "question",
+          "type": "documentation"
+        }
+      ],
+      "name": "ordered_at"
+    }
+  ],
+  "format": "stasrift-evidence-v2",
+  "parse_errors": [],
+  "repo": "."
+}

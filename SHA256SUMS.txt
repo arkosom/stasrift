@@ -1,0 +1,2 @@
+# SHA256 checksums
+e2b072bd8c5d48724155d8cd89dce3984d15c2f955bec2f2529205334e929078  stasrift-1.0.0-py3-none-any.whl

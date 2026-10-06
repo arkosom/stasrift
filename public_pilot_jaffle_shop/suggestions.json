@@ -1,0 +1,30 @@
+{
+  "format": "stasrift-suggestions-v2",
+  "source_contract_sha256": "86e0616c50e5f7d469594b5178a65f065ccc5db43f231032bb3dbe74dfc8e0a4",
+  "suggestions": [
+    {
+      "allowed_actions": [
+        "answer",
+        "skip"
+      ],
+      "attribute": "unit",
+      "choices": [],
+      "confidence": null,
+      "evidence": [
+        {
+          "attribute": "unit",
+          "description": "output expression appears to convert cents to a major currency unit; currency is not inferable",
+          "source": "models/staging/stg_payments.sql:9",
+          "supports": "question",
+          "type": "lineage"
+        }
+      ],
+      "evidence_hash": "17d2db626b2760157e41cf95d9d6870e64572117ba65eb428e27c79f4e30019c",
+      "field": "amount",
+      "kind": "question",
+      "new_evidence": true,
+      "proposed": null,
+      "rule_id": "unit-human-only-v1"
+    }
+  ]
+}

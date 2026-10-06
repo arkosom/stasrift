@@ -1,0 +1,56 @@
+{
+  "format": "stasrift-suggestions-v2",
+  "source_contract_sha256": "8a10bbc04c1154875fbffbf136f775570d98a5fe79d3ceab98be29caec05286f",
+  "suggestions": [
+    {
+      "allowed_actions": [
+        "choose",
+        "skip"
+      ],
+      "attribute": "unit",
+      "confidence": "low",
+      "evidence": [
+        {
+          "attribute": "unit",
+          "description": "dbt documentation explicitly names currency USD",
+          "source": "models/marts/orders.yml",
+          "supports": "USD",
+          "type": "documentation"
+        }
+      ],
+      "evidence_hash": "c91bf46d03ff6d0c22a6613b107a0dffe8c11acc08bea2c2e5ef7822cec58024",
+      "field": "order_total",
+      "kind": "suggestion",
+      "new_evidence": true,
+      "proposed": [
+        "USD"
+      ],
+      "rule_id": "unit-evidence-v2"
+    },
+    {
+      "allowed_actions": [
+        "choose",
+        "skip"
+      ],
+      "attribute": "time_axis",
+      "confidence": "low",
+      "evidence": [
+        {
+          "attribute": "time_axis",
+          "description": "dbt documentation describes when the business event occurred",
+          "source": "models/marts/orders.yml",
+          "supports": "event_time",
+          "type": "documentation"
+        }
+      ],
+      "evidence_hash": "40afcec0985ff051f39a404a08dfe33322af7fa4467038f0561afc2bfd482b2d",
+      "field": "ordered_at",
+      "kind": "suggestion",
+      "new_evidence": true,
+      "proposed": [
+        "event_time"
+      ],
+      "rule_id": "time-axis-evidence-v3"
+    }
+  ]
+}
