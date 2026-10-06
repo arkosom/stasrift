@@ -74,7 +74,7 @@ def test_skip_persistence_suppresses_same_evidence(tmp_path):
 def test_version():
     p = run("--version")
     assert p.returncode == 0
-    assert "1.0.0-rc2" in p.stdout
+    assert p.stdout.strip() == "stasrift 1.0.0"
 
 def test_review_dry_run_no_color(tmp_path):
     ev = tmp_path / "evidence.json"
