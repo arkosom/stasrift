@@ -22,7 +22,73 @@ event_time -> processing_time
 
 A shape-only checker passes. Stasrift returns `INCOMPATIBLE`.
 
-## Install
+## Try Stasrift in 5 minutes
+
+Requires Python 3.10 or newer. Download the wheel from the
+[v1.0.0 release](https://github.com/arkosom/stasrift/releases/tag/v1.0.0).
+Stasrift is not published to PyPI.
+
+**1. Install.** Open a terminal in your download folder, create an isolated environment,
+and activate it:
+
+```bash
+python -m venv .venv
+```
+
+macOS/Linux: `source .venv/bin/activate`. Windows Command Prompt: `.venv\Scripts\activate.bat`.
+On systems where Python is named `python3`, use that for the first command.
+
+```bash
+python -m pip install ./stasrift-1.0.0-py3-none-any.whl
+stasrift --version
+```
+
+Expected version: `stasrift 1.0.0`.
+
+**2. See the proof.** In a new scratch folder, save this as `old.yaml`:
+
+```yaml
+stasrift_format: stasrift-contract-v1
+fields:
+  - name: occurred_at
+    type: timestamp
+    sem:
+      time_axis: [event_time]
+```
+
+Copy it to `new.yaml` and change only `event_time` to `processing_time`. Run:
+
+```bash
+stasrift validate --contract old.yaml
+stasrift diff --old old.yaml --new new.yaml
+```
+
+Expect `VALID`, then `INCOMPATIBLE`: the timestamp type stayed the same, but its
+declared meaning changed. Exit code `1` from this diff is expected, not an installation failure.
+
+**3. Try one real repository.** From its root, create `pilot-contract.yaml` with the
+same format, listing the actual field names you want to inspect. Omit `sem` for
+meaning you have not declared; do not copy the example's meaning onto unrelated fields.
+
+```bash
+stasrift validate --contract pilot-contract.yaml
+stasrift doctor --repo .
+stasrift scan --repo . --contract pilot-contract.yaml --out .semcheck/evidence.json
+stasrift suggest --evidence .semcheck/evidence.json --out .semcheck/suggestions.json
+stasrift review --suggestions .semcheck/suggestions.json --contract pilot-contract.yaml
+```
+
+Review shows a diff before you choose whether to write the contract. Suggestions
+are evidence for human review, not automatic proof of meaning. Keep generated
+`.semcheck/` files local unless you deliberately choose to share them.
+
+**4. Tell us what happened.** [Open pilot feedback](https://github.com/arkosom/stasrift/issues/new?template=pilot-feedback.yml)
+even if installation failed or nothing useful was found. Tell us your repo tooling,
+useful findings, false positives or missed changes, and whether you would run it in CI.
+Maintainers use `bug`, `false-positive`, or `idea` when triaging feedback.
+Share only a small sanitized example; GitHub Issues are public.
+
+## Install from source
 
 ```bash
 python -m venv .venv
