@@ -1,0 +1,65 @@
+name: Pilot feedback
+description: Tell us how Stasrift v1.0.0 worked on your repository, including failed installs.
+title: "[Pilot]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying Stasrift. Reports of failed installs or no useful findings are welcome.
+        Issues are public: share sanitized examples only, without credentials, private data, or full repository dumps.
+        Maintainers triage reports with bug, false-positive, or idea.
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Did installation succeed?
+      options:
+        - "Yes"
+        - "No"
+        - Partially
+        - Not attempted
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and installation details
+      description: OS, Python version, Stasrift version, install method, and any sanitized error output.
+    validations:
+      required: true
+  - type: textarea
+    id: repository
+    attributes:
+      label: Repository type and tooling
+      description: For example dbt and SQL dialect, ETL, data contracts, or event pipelines. Did doctor and scan recognize the relevant files? No private repository link is needed.
+    validations:
+      required: true
+  - type: textarea
+    id: usefulness
+    attributes:
+      label: Did Stasrift find anything useful?
+      description: Describe one useful finding, or say none or unable to run. What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: accuracy
+    attributes:
+      label: False positives or false negatives
+      description: Any incorrect flags or missed semantic changes? Include expected versus actual behavior and a minimal sanitized example if possible. None or not tested is fine.
+    validations:
+      required: true
+  - type: dropdown
+    id: ci
+    attributes:
+      label: Would you run Stasrift in CI?
+      options:
+        - "Yes"
+        - "Maybe"
+        - "No"
+        - Unable to assess
+    validations:
+      required: true
+  - type: textarea
+    id: next
+    attributes:
+      label: What would make it worth running again?
+      description: Explain your CI answer, setup friction, or the most useful improvement.
