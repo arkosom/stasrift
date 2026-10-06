@@ -18,6 +18,7 @@
     <a href="#proof">Proof</a>
     <a href="#how">How it works</a>
     <a href="#install">Install</a>
+    <a href="#pilot">Pilot</a>
     <a href="#origin">Origin</a>
   </nav>
 </header>
@@ -77,20 +78,25 @@ Same timestamp shape. Different declared meaning.</code></pre>
 
 <section id="install" class="section">
   <div class="section-kicker">Install</div>
-  <h2>One local CLI.</h2>
+  <h2>Try Stasrift in 5 minutes.</h2>
+  <p class="note">Install v1.0.0, compare two tiny contracts, then try your own repository. <a href="https://github.com/arkosom/stasrift#try-stasrift-in-5-minutes">Follow the five-minute guide</a> for environment setup, sample files, and expected results.</p>
   <div class="terminal">
 <pre><code><span class="prompt">$</span> python -m pip install ./stasrift-1.0.0-py3-none-any.whl
 <span class="prompt">$</span> stasrift --version
-stasrift 1.0.0
-
-<span class="prompt">$</span> stasrift doctor --repo .
-<span class="prompt">$</span> stasrift scan --repo . --contract contract.yaml
-<span class="prompt">$</span> stasrift suggest --evidence .semcheck/evidence.json
-<span class="prompt">$</span> stasrift review --suggestions .semcheck/suggestions.json --contract contract.yaml
-<span class="prompt">$</span> stasrift diff --old old.yaml --new new.yaml</code></pre>
+stasrift 1.0.0</code></pre>
   </div>
   <p class="note">Requires Python 3.10 or newer. <a href="https://github.com/arkosom/stasrift/releases/tag/v1.0.0">Download the v1.0.0 wheel from GitHub</a>, then run the install command from your download folder. Stasrift is not yet published to PyPI.</p>
   <p class="note"><a href="https://github.com/arkosom/stasrift#readme">Read the documentation</a> · <a href="https://github.com/arkosom/stasrift">View the source on GitHub</a></p>
+</section>
+
+<section id="pilot" class="section">
+  <div class="section-kicker">Public pilot</div>
+  <h2>Try it on one real repository.</h2>
+  <p class="note">Working with dbt, SQL, ETL, data contracts, or event pipelines? Try Stasrift and tell us whether installation worked, what tooling you use, whether it found anything useful, what it flagged incorrectly or missed, and whether you would run it in CI.</p>
+  <p class="note">Failed installs and reports of no useful findings are welcome. Share a small sanitized example; GitHub Issues are public.</p>
+  <div class="actions">
+    <a class="button primary" href="https://github.com/arkosom/stasrift/issues/new?template=pilot-feedback.yml">Share pilot feedback</a>
+  </div>
 </section>
 
 <section id="origin" class="section origin">
