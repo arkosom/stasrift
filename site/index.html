@@ -19,13 +19,14 @@
     <a href="#how">How it works</a>
     <a href="#install">Install</a>
     <a href="#pilot">Pilot</a>
+    <a href="review.html">Risk review</a>
     <a href="#origin">Origin</a>
   </nav>
 </header>
 
 <main id="top">
 <section class="hero">
-  <div class="eyebrow">Stasrift 1.0</div>
+  <div class="eyebrow">Stasrift 1.0.1</div>
   <h1>Structure stayed compatible.<br><span>Meaning did not.</span></h1>
   <p class="lede">Stasrift checks whether declared data meaning changed across versions, even when the schema still passes.</p>
   <p class="trust">Local CLI · No server · No accounts · Human-reviewed</p>
@@ -79,13 +80,14 @@ Same timestamp shape. Different declared meaning.</code></pre>
 <section id="install" class="section">
   <div class="section-kicker">Install</div>
   <h2>Try Stasrift in 5 minutes.</h2>
-  <p class="note">Install v1.0.0, compare two tiny contracts, then try your own repository. <a href="https://github.com/arkosom/stasrift#try-stasrift-in-5-minutes">Follow the five-minute guide</a> for environment setup, sample files, and expected results.</p>
+  <p class="note">Install v1.0.1, compare two tiny contracts, then try your own repository. <a href="https://github.com/arkosom/stasrift#try-stasrift-in-5-minutes">Follow the five-minute guide</a> for environment setup, sample files, and expected results.</p>
   <div class="terminal">
-<pre><code><span class="prompt">$</span> python -m pip install ./stasrift-1.0.0-py3-none-any.whl
+<pre><code><span class="prompt">$</span> python -m pip install ./stasrift-1.0.1-py3-none-any.whl
 <span class="prompt">$</span> stasrift --version
-stasrift 1.0.0</code></pre>
+stasrift 1.0.1</code></pre>
   </div>
-  <p class="note">Requires Python 3.10 or newer. <a href="https://github.com/arkosom/stasrift/releases/tag/v1.0.0">Download the v1.0.0 wheel from GitHub</a>, then run the install command from your download folder. Stasrift is not yet published to PyPI.</p>
+  <p class="note">Requires Python 3.10 or newer. <a href="https://github.com/arkosom/stasrift/releases/tag/v1.0.1">Download the v1.0.1 wheel from GitHub</a>, then run the install command from your download folder. Stasrift is not yet published to PyPI.</p>
+  <p class="note">v1.0.1 rejects conflicting duplicate fields and unsupported semantic keys. Validate existing contracts before upgrading. <a href="https://github.com/arkosom/stasrift/blob/v1.0.1/RELEASE_NOTES_v1.0.1.md">Migration guidance and known limitations</a> · <a href="https://github.com/arkosom/stasrift/releases/download/v1.0.1/SHA256SUMS-1.0.1.txt">SHA256 checksums</a></p>
   <p class="note"><a href="https://github.com/arkosom/stasrift#readme">Read the documentation</a> · <a href="https://github.com/arkosom/stasrift">View the source on GitHub</a></p>
 </section>
 
