@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+cd -- "$(dirname -- "$0")"
 python stasrift.py --version
 python stasrift.py validate --contract examples/orders.stasrift.yaml
 python baseline_shape_check.py incident_fixture/schema_v1.yaml incident_fixture/schema_v2.yaml

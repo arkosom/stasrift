@@ -1,14 +1,15 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "stasrift"
-version = "1.0.0"
+version = "1.0.1"
 description = "Local semantic compatibility checks for data contracts."
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 authors = [{name = "Arkosom"}]
 dependencies = ["PyYAML>=6.0"]
 
@@ -26,5 +27,5 @@ where = ["src"]
 
 [project.urls]
 Homepage = "https://stasrift.com"
-Documentation = "https://stasrift.com"
-Issues = "https://stasrift.com"
+Documentation = "https://github.com/arkosom/stasrift#readme"
+Issues = "https://github.com/arkosom/stasrift/issues"

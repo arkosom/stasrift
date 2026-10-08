@@ -1,4 +1,4 @@
-# Stasrift 1.0
+# Stasrift 1.0.1
 
 Stasrift is a local semantic compatibility checker for data contracts. It is derived from the J = 0 / Speed of Static design work.
 
@@ -25,7 +25,7 @@ A shape-only checker passes. Stasrift returns `INCOMPATIBLE`.
 ## Try Stasrift in 5 minutes
 
 Requires Python 3.10 or newer. Download the wheel from the
-[v1.0.0 release](https://github.com/arkosom/stasrift/releases/tag/v1.0.0).
+[v1.0.1 release](https://github.com/arkosom/stasrift/releases/tag/v1.0.1).
 Stasrift is not published to PyPI.
 
 **1. Install.** Open a terminal in your download folder, create an isolated environment,
@@ -39,11 +39,11 @@ macOS/Linux: `source .venv/bin/activate`. Windows Command Prompt: `.venv\Scripts
 On systems where Python is named `python3`, use that for the first command.
 
 ```bash
-python -m pip install ./stasrift-1.0.0-py3-none-any.whl
+python -m pip install ./stasrift-1.0.1-py3-none-any.whl
 stasrift --version
 ```
 
-Expected version: `stasrift 1.0.0`.
+Expected version: `stasrift 1.0.1`.
 
 **2. See the proof.** In a new scratch folder, save this as `old.yaml`:
 
@@ -154,12 +154,12 @@ Stasrift is local-first. `suggest` never writes semantic meaning. `review` is th
 ## Verify this release
 
 ```bash
-./verify_release.sh
+bash verify_release.sh
 ```
 
 ## Status
 
-RC2 is for external pilot testing. Before 1.0 final: verify on a second OS, run a real external repository, and complete brand/trademark clearance.
+v1.0.1 is the maintenance release. Windows and Linux with Python 3.10 and 3.12 are covered by native CI. Historical pilot reports describe their original candidates.
 
 
 ## First public pilot
@@ -192,3 +192,30 @@ See `PILOT_REPORT_RC4.md`.
 The v1 contract format and CLI are frozen.
 
 Future 1.x releases may add parsers, adapters, and evidence sources without changing the meaning of existing v1 semantic declarations.
+
+## Maintenance release 1.0.1
+
+See [release notes](RELEASE_NOTES_1.0.1.md) for migration guidance and limitations.
+
+`UNCHANGED` means the supported declarations compare equally; it is not proof
+that missing declarations are correct, or that code implements them. Physical
+types and business meaning outside `time_axis`, `unit`, and `absent` require
+other checks. Empty contracts are accepted by the frozen schema.
+
+Canonical v1 requires semantic arrays; legacy contracts without a format marker
+continue accepting scalar semantics. Conflicting duplicate fields, duplicate explicit keys, and unknown semantic
+attributes are rejected rather than silently discarded. Currency words such as
+cents or dollars do not establish a currency. SQL scanning is heuristic and
+conservatively suppresses lineage in JOIN/UNION models; unsupported SQL can be
+missed. Review remains a human decision, not a certification of source truth.
+
+Dry runs, cancelled reviews, and paused reviews leave contract and skip state
+unchanged. Confirmed JSON contracts remain JSON. Generated bundles are editable
+local artifacts, not authenticated evidence; do not accept bundles from strangers.
+
+YAML merge
+precedence and identical repeated declarations are supported. Conflicting repeated
+field names now fail instead of silently using the last declaration; reconcile
+them into one field. For canonical v1, convert scalar semantics to arrays and
+correct unknown semantic keys or move unsupported annotations into metadata. Legacy scalar contracts without a format marker
+remain supported. Unicode output is safely escaped on limited console encodings.
