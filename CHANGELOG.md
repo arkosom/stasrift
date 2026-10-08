@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1
+
+- Input and review safety corrections, conservative SQL/currency evidence.
+- Complete license, release verification, adversarial tests, and documentation.
+- Preserve YAML merges and identical repeated fields; fix editable-source
+  imports and legacy-encoding review output.
+- See RELEASE_NOTES_1.0.1.md for details.
+
 ## 1.0.0
 
 - First stable release.

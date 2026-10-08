@@ -34,21 +34,62 @@ def canonical(obj):
 def sha256_text(text):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
+def _unique_json_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise StasriftError(f"duplicate JSON key: {key}")
+        result[key] = value
+    return result
+
+
+def _reject_json_constant(value):
+    raise StasriftError(f"non-finite JSON number: {value}")
+
+
+if yaml is not None:
+    class UniqueSafeLoader(yaml.SafeLoader):
+        pass
+
+    def _unique_yaml_mapping(loader, node):
+        # Check explicitly written keys before SafeLoader expands merge defaults.
+        # YAML merge precedence and explicit overrides remain backward compatible.
+        seen = set()
+        merge_seen = False
+        for key_node, _ in node.value:
+            if key_node.tag == "tag:yaml.org,2002:merge":
+                if merge_seen:
+                    raise StasriftError("duplicate YAML merge key")
+                merge_seen = True
+                continue
+            key = loader.construct_object(key_node, deep=True)
+            try:
+                if key in seen:
+                    raise StasriftError(f"duplicate YAML key: {key}")
+                seen.add(key)
+            except TypeError as exc:
+                raise StasriftError("YAML mapping keys must be hashable") from exc
+        return loader.construct_mapping(node, deep=True)
+
+    UniqueSafeLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _unique_yaml_mapping)
+
+
 def load_any(path):
     path = Path(path)
     try:
         text = path.read_text(encoding="utf-8")
-    except OSError as e:
+    except (OSError, UnicodeError) as e:
         raise StasriftError(f"cannot read {path}: {e}") from e
     if path.suffix.lower() == ".json":
         try:
-            return json.loads(text)
+            return json.loads(text, object_pairs_hook=_unique_json_object, parse_constant=_reject_json_constant)
         except json.JSONDecodeError as e:
             raise StasriftError(f"invalid JSON in {path}: {e}") from e
     if yaml is None:
         raise StasriftError("PyYAML is required for YAML files. Install with: pip install PyYAML")
     try:
-        return yaml.safe_load(text)
+        return yaml.load(text, Loader=UniqueSafeLoader)
     except Exception as e:
         raise StasriftError(f"invalid YAML in {path}: {e}") from e
 
@@ -61,6 +102,9 @@ def normalize_contract(data, source="<memory>"):
     if not isinstance(data, dict):
         raise StasriftError(f"{source}: contract root must be an object")
     _ensure_supported_contract_format(data, source)
+    is_v1 = data.get("stasrift_format") == "stasrift-contract-v1"
+    if is_v1 and not isinstance(data.get("fields"), list):
+        raise StasriftError(f"{source}: v1 requires a fields list")
     raw_fields = None
     if isinstance(data.get("fields"), list):
         raw_fields = data["fields"]
@@ -71,20 +115,40 @@ def normalize_contract(data, source="<memory>"):
     if raw_fields is None:
         raise StasriftError(f"{source}: expected a 'fields' list or ODCS-like 'properties' list")
     out = {}
+    original_fields = {}
     for idx, item in enumerate(raw_fields):
         if not isinstance(item, dict):
             raise StasriftError(f"{source}: field #{idx+1} must be an object")
         name = item.get("name")
         if not isinstance(name, str) or not name.strip():
             raise StasriftError(f"{source}: field #{idx+1} missing valid 'name'")
+        if is_v1 and "sem" in item and not isinstance(item["sem"], dict):
+            raise StasriftError(f"{source}: v1 sem must be an object")
         sem = item.get("sem")
         if sem is None:
             cp = item.get("customProperties")
             if isinstance(cp, dict):
                 sem = cp.get("sem")
-        sem = sem or {}
+        if name in out:
+            if item == original_fields[name]:
+                continue  # An exact repeated declaration carries no new meaning.
+            raise StasriftError(f"{source}: conflicting duplicate field name '{name}'")
+        original_fields[name] = item
+        if sem is None:
+            sem = {}
         if not isinstance(sem, dict):
             raise StasriftError(f"{source}: field '{name}' sem must be an object")
+        unknown = set(sem) - {"time_axis", "unit", "absent"}
+        if unknown:
+            raise StasriftError(f"{source}: field '{name}' unsupported semantic attributes: {sorted(map(str, unknown))}")
+        if is_v1 and "nullable" in item and not isinstance(item["nullable"], bool):
+            raise StasriftError(f"{source}: nullable must be boolean")
+        if is_v1:
+            for attr, value in sem.items():
+                if not isinstance(value, list) or any(not isinstance(v, str) for v in value):
+                    raise StasriftError(f"{source}: v1 {attr} must be an array of strings")
+                if len(value) != len(set(value)):
+                    raise StasriftError(f"{source}: v1 {attr} values must be unique")
         nsem = {}
         if "time_axis" in sem:
             nsem["time_axis"] = normalize_modes(sem["time_axis"], "time_axis", name, source, TIME_AXES)
@@ -302,11 +366,18 @@ def _extract_ctes(sql_text):
         break
     return ctes
 
+def _sql_code(text):
+    """Mask comments and string literals so prose cannot become lineage evidence."""
+    pattern = r"--[^\n]*|/\*[\s\S]*?\*/|'(?:''|[^'])*'"
+    return re.sub(pattern, lambda m: ''.join('\n' if c == '\n' else ' ' for c in m.group()), text)
+
+
 def _collect_cte_output_semantics(sql_text):
     """
     Infer simple alias semantics inside each CTE.
     Returns cte_name -> alias -> evidence summary.
     """
+    sql_text = _sql_code(sql_text)
     result = {}
     for name, body in _extract_ctes(sql_text).items():
         aliases = {}
@@ -323,9 +394,7 @@ def _collect_cte_output_semantics(sql_text):
                     sem.add(("time_axis", "event_time"))
                 if re.search(r"\b(ingest|ingested|ingestion)(?:_timestamp|_time|_at|_ts)?\b", low):
                     sem.add(("time_axis", "ingestion_time"))
-                if re.search(r"/\s*100(?:\.0+)?\b", low) and (
-                    re.search(r"\b(raw_)?\w*cents?\b", low) or "cents" in body.lower()
-                ):
+                if re.search(r"/\s*100(?:\.0+)?\b", low):
                     sem.add(("unit", "question"))
                 if re.search(r"\bcoalesce\s*\(", low):
                     sem.add(("absent", "question"))
@@ -416,7 +485,10 @@ def _sql_lineage_evidence(sql_text, relpath, fields):
     Produce field-targeted evidence from SELECT expressions.
     v0.7 adds simple CTE propagation in addition to alias-aware expressions.
     """
+    sql_text = _sql_code(_strip_jinja(sql_text))
     out = {f: [] for f in fields}
+    if re.search(r"\b(join|union)\b", sql_text, re.I):
+        return out
     cte_sem = _collect_cte_output_semantics(sql_text)
 
     for select_list, block_line in _find_select_blocks(sql_text):
@@ -449,10 +521,8 @@ def _sql_lineage_evidence(sql_text, relpath, fields):
             if re.search(r"\b(ingest|ingested|ingestion)(?:_timestamp|_time|_at|_ts)?\b", low):
                 add("time_axis", "ingestion_time", "output expression derives from ingestion time")
 
-            if re.search(r"/\s*100(?:\.0+)?\b", low) and (
-                re.search(r"\b(raw_)?\w*cents?\b", low) or "cents" in sql_text.lower()
-            ):
-                add("unit", "question", "output expression appears to convert cents to a major currency unit; currency is not inferable")
+            if re.search(r"/\s*100(?:\.0+)?\b", low):
+                add("unit", "question", "output expression scales by 100; unit and currency require human declaration")
 
             if re.search(r"\bcoalesce\s*\(", low):
                 out[alias].append({
@@ -608,7 +678,9 @@ def _collect_model_output_semantics(sql_text):
     if _top_level_contains(_strip_jinja(sql_text), "union"):
         return {}
 
-    cleaned = _strip_jinja(sql_text)
+    cleaned = _sql_code(_strip_jinja(sql_text))
+    if re.search(r"\b(join|union)\b", cleaned, re.I):
+        return {}
     cte_sem = _collect_cte_output_semantics(cleaned)
     outputs = {}
 
@@ -631,9 +703,7 @@ def _collect_model_output_semantics(sql_text):
             sem.add(("time_axis", "event_time"))
         if re.search(r"\b(ingest|ingested|ingestion)(?:_timestamp|_time|_at|_ts)?\b", low):
             sem.add(("time_axis", "ingestion_time"))
-        if re.search(r"/\s*100(?:\.0+)?\b", low) and (
-            re.search(r"\b(raw_)?\w*cents?\b", low) or "cents" in sql_text.lower()
-        ):
+        if re.search(r"/\s*100(?:\.0+)?\b", low):
             sem.add(("unit", "question"))
         if re.search(r"\bcoalesce\s*\(", low):
             sem.add(("absent", "question"))
@@ -699,7 +769,7 @@ def _propagate_dbt_semantics(index, max_rounds=8):
         for model, info in index.items():
             refs = info["deps"]["refs"]
 
-            if _top_level_contains(_strip_jinja(info["raw"]), "union"):
+            if re.search(r"\b(join|union)\b", _sql_code(_strip_jinja(info["raw"])), re.I):
                 continue
 
             if len(refs) != 1:
@@ -912,12 +982,12 @@ def scan_repo(repo, contract, out):
         low = field.lower()
         unit_support = None
         unit_desc = None
-        if low.endswith("_usd") or low.endswith("_dollars"):
+        if low.endswith("_usd"):
             unit_support, unit_desc = "USD", "field name suggests U.S. dollars"
         elif low.endswith("_eur") or low.endswith("_euros"):
             unit_support, unit_desc = "EUR", "field name suggests euros"
-        elif low.endswith("_cents"):
-            unit_support, unit_desc = "USD_cent", "field name suggests cents; currency still requires confirmation"
+        elif low.endswith(("_cents", "_dollars")):
+            unit_support, unit_desc = "question", "field name suggests a currency denomination; currency is not inferable"
         elif low.endswith("_ms") and not any(x in low for x in ("timestamp", "time", "latency", "duration")):
             unit_support, unit_desc = "ms", "field name suffix suggests milliseconds"
         if unit_support:
@@ -1148,10 +1218,31 @@ def suggestion_for_field(item):
 
     return out
 
+def _validate_bundle_items(items, name_key):
+    if not isinstance(items, list):
+        raise StasriftError("bundle items must be a list")
+    for item in items:
+        if not isinstance(item, dict) or not isinstance(item.get(name_key), str):
+            raise StasriftError("bundle item requires a string field name")
+        evidence = item.get("evidence", [])
+        if not isinstance(evidence, list):
+            raise StasriftError("evidence must be a list")
+        for entry in evidence:
+            if not isinstance(entry, dict) or any(
+                not isinstance(entry.get(key), str)
+                for key in ("type", "attribute", "supports", "description", "source")
+            ):
+                raise StasriftError("malformed evidence entry")
+            attr, support = entry["attribute"], entry["supports"]
+            if attr == "time_axis" and support not in TIME_AXES | {"question"}:
+                raise StasriftError("unsupported time-axis evidence")
+
+
 def suggest_from_bundle(bundle, out=None, skip_file=None):
-    if not isinstance(bundle, dict) or bundle.get("format") not in {"stasrift-evidence-v1","stasrift-evidence-v2"}:
+    if not isinstance(bundle, dict) or bundle.get("format") not in ("stasrift-evidence-v1", "stasrift-evidence-v2"):
         raise StasriftError("malformed or unsupported evidence bundle")
 
+    _validate_bundle_items(bundle.get("fields", []), "name")
     skipped = {}
     if skip_file and Path(skip_file).exists():
         try:
@@ -1159,6 +1250,8 @@ def suggest_from_bundle(bundle, out=None, skip_file=None):
         except Exception:
             skipped = {}
 
+    if not isinstance(skipped, dict):
+        raise StasriftError("skip state must be an object")
     suggestions = []
     for item in sorted(bundle.get("fields", []), key=lambda x: x.get("name", "")):
         for s in suggestion_for_field(item):
@@ -1215,7 +1308,10 @@ def apply_decisions_to_contract(contract_data, decisions):
     # minimal fields-list only for v0.2 writer
     if not isinstance(contract_data, dict) or not isinstance(contract_data.get("fields"), list):
         raise StasriftError("review/write currently supports the minimal 'fields' contract shape")
-    by_name = {f.get("name"): f for f in contract_data["fields"] if isinstance(f, dict)}
+    by_name = {}
+    for field in contract_data["fields"]:
+        if isinstance(field, dict):
+            by_name.setdefault(field.get("name"), []).append(field)
     for d in decisions:
         if d.get("action") not in {"confirm", "decide"}:
             continue
@@ -1224,8 +1320,9 @@ def apply_decisions_to_contract(contract_data, decisions):
         attr = d["attribute"]
         if name not in by_name:
             continue
-        sem = by_name[name].setdefault("sem", {})
-        sem[attr] = value if isinstance(value, list) else [value]
+        for field in by_name[name]:
+            sem = field.setdefault("sem", {})
+            sem[attr] = value if isinstance(value, list) else [value]
     return contract_data
 
 
@@ -1313,17 +1410,35 @@ def _save_skip_state(path, data):
 
 def cmd_review(args):
     props = load_any(args.suggestions)
-    if props.get("format") not in {"stasrift-suggestions-v1","stasrift-suggestions-v2"}:
+    if not isinstance(props, dict) or props.get("format") not in ("stasrift-suggestions-v1", "stasrift-suggestions-v2"):
         raise StasriftError("unsupported suggestions file")
 
     contract_path = Path(args.contract)
     original_text = contract_path.read_text(encoding="utf-8")
     original_hash = sha256_text(original_text)
     contract_data = load_any(contract_path)
+    normalize_contract(contract_data, str(contract_path))
+    if props.get("source_contract_sha256") not in (None, original_hash):
+        raise StasriftError("suggestions are stale: contract hash has changed; scan and suggest again")
 
     skip_state = _load_skip_state(args.skip_file)
     decisions = []
     items = props.get("suggestions", [])
+    _validate_bundle_items(items, "field")
+    known_fields = normalize_contract(contract_data)
+    for item in items:
+        attr = item.get("attribute")
+        if item["field"] not in known_fields or attr not in ("time_axis", "unit", "absent"):
+            raise StasriftError("suggestion targets unknown field or semantic attribute")
+        if item.get("kind") not in ("suggestion", "question", "conflict"):
+            raise StasriftError("unsupported suggestion kind")
+        for key in ("allowed_actions", "choices", "contenders"):
+            if not isinstance(item.get(key, []), list) or any(not isinstance(v, str) for v in item.get(key, [])):
+                raise StasriftError(f"suggestion {key} must be a string list")
+        if item["kind"] == "suggestion":
+            if not isinstance(item.get("proposed"), list):
+                raise StasriftError("proposed values must be a list")
+            normalize_modes(item.get("proposed"), attr, item["field"], "suggestion", TIME_AXES if attr == "time_axis" else ABSENT_MEANINGS if attr == "absent" else None)
     total = len(items)
     done = 0
     enabled = _color_enabled(args)
@@ -1426,7 +1541,10 @@ def cmd_review(args):
                     skip_state[key] = {"evidence_hash": s.get("evidence_hash")}
                 else:
                     try:
-                        choice = choices[int(ans)-1]
+                        selection = int(ans)
+                        if not 1 <= selection <= len(choices):
+                            raise ValueError("selection out of range")
+                        choice = choices[selection-1]
                     except Exception:
                         raise StasriftError(f"invalid selection for {s['attribute']}")
                     decisions.append({"field": s["field"], "attribute": s["attribute"],
@@ -1447,11 +1565,10 @@ def cmd_review(args):
                     raise StasriftError(f"empty value for {s['attribute']}")
         done += 1
 
-    # Persist skip choices only after the review is complete.
-    _save_skip_state(args.skip_file, skip_state)
-
     updated = apply_decisions_to_contract(contract_data, decisions)
-    new_text = dump_yaml(updated)
+    normalize_contract(updated, str(contract_path))
+    new_text = (json.dumps(updated, indent=2, ensure_ascii=False) + "\n"
+                if contract_path.suffix.lower() == ".json" else dump_yaml(updated))
 
     print()
     print(_rule("WRITE PREVIEW"))
@@ -1473,7 +1590,10 @@ def cmd_review(args):
         print(_c("Nothing written.", "gray", enabled))
         return 0
 
+    if sha256_text(contract_path.read_text(encoding="utf-8")) != original_hash:
+        raise StasriftError("contract changed while awaiting approval; aborting write")
     contract_path.write_text(new_text, encoding="utf-8")
+    _save_skip_state(args.skip_file, skip_state)
     print(_c(f"Wrote {contract_path}", "green", enabled, bold=True))
     return 0
 
@@ -1655,18 +1775,24 @@ def cmd_demo(args):
     old, new = _demo_paths(base)
     if not old.exists() or not new.exists():
         raise StasriftError("incident fixture missing")
+    old_data, new_data = load_any(old), load_any(new)
+    normalize_contract(old_data, str(old))
+    normalize_contract(new_data, str(new))
+    old_shape = {f["name"]: f.get("type") for f in old_data["fields"]}
+    new_shape = {f["name"]: f.get("type") for f in new_data["fields"]}
     print("BASELINE SHAPE CHECK")
-    print("PASS: field names and physical types unchanged")
+    print("PASS: field names and physical types unchanged" if old_shape == new_shape
+          else "FAIL: structural schema changed")
     print()
     print("STASRIFT")
     result = compare_contracts(load_contract(old), load_contract(new))
     print_human(result)
-    return 1 if result["verdict"] in {"WIDENED", "INCOMPATIBLE"} else 0
+    return 1 if old_shape != new_shape or result["verdict"] in {"WIDENED", "INCOMPATIBLE"} else 0
 
 def build_parser():
     p = argparse.ArgumentParser(prog="stasrift",
         description="Check whether declared data meaning stays compatible across versions.")
-    p.add_argument("--version", action="version", version="stasrift 1.0.0")
+    p.add_argument("--version", action="version", version="stasrift 1.0.1")
     sub = p.add_subparsers(dest="command", required=True)
 
     d = sub.add_parser("diff", help="compare two semantic contracts")
@@ -1718,6 +1844,11 @@ def build_parser():
     return p
 
 def main():
+    # Piped Windows output may use a legacy encoding. Escape unsupported glyphs
+    # instead of failing a valid command; UTF-8 output is unchanged.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="backslashreplace")
     p = build_parser()
     args = p.parse_args()
     try:
@@ -1726,7 +1857,7 @@ def main():
             if hasattr(args, attr):
                 Path(getattr(args, attr)).parent.mkdir(parents=True, exist_ok=True)
         return args.func(args)
-    except StasriftError as e:
+    except (StasriftError, OSError, UnicodeError, EOFError, RecursionError) as e:
         print(f"stasrift: error: {e}", file=sys.stderr)
         return 2
 

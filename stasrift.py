@@ -4,8 +4,11 @@ import sys
 
 HERE = Path(__file__).resolve().parent
 SRC = HERE / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+# Editable installs may already put src later on sys.path. It must precede
+# this wrapper's directory, or stasrift.py shadows the stasrift package.
+if str(SRC) in sys.path:
+    sys.path.remove(str(SRC))
+sys.path.insert(0, str(SRC))
 
 from stasrift.cli import main
 
