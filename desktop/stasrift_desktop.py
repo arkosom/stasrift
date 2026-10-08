@@ -4,8 +4,6 @@ Run with: python desktop/stasrift_desktop.py
 Requires the Stasrift CLI installed in the current Python environment.
 Tkinter is included in many Python distributions but may need separate installation on Linux.
 """
-import json
-import os
 import subprocess
 import sys
 import threading
@@ -65,13 +63,11 @@ class App:
             messagebox.showerror("Missing input", "Select the required files or repository first.")
             return
         self.status.set("Running local check…")
-        for child in self.root.winfo_children():
-            pass
         threading.Thread(target=self.worker, args=(args,), daemon=True).start()
 
     def worker(self, args):
         try:
-            result = subprocess.run([sys.executable, "-m", "stasrift.cli", *args],
+            result = subprocess.run([sys.executable, "-c", "import sys; from stasrift.cli import main; sys.exit(main())", *args],
                                     capture_output=True, text=True, errors="replace",
                                     timeout=120, stdin=subprocess.DEVNULL)
             report = "Command: stasrift " + " ".join(args) + "\nExit code: " + str(result.returncode) + "\n\n" + result.stdout + result.stderr
