@@ -57,3 +57,5 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:28px;max-widt
   .origin img{justify-self:start;width:150px}
   footer{flex-direction:column}
 }
+
+.skip-link{position:absolute;left:1rem;top:-100px;background:#e9f0f8;color:#08131e;padding:1rem;z-index:100}.skip-link:focus{top:1rem}:focus-visible{outline:3px solid #20c8df;outline-offset:4px}nav a{min-height:44px;display:inline-flex;align-items:center}@media(max-width:760px){.topbar{flex-wrap:wrap;gap:1rem}.topbar nav{display:flex;flex-wrap:wrap;gap:.4rem 1rem;width:100%}.hero{padding-top:3rem}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
