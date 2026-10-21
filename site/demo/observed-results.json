@@ -1,0 +1,164 @@
+{
+  "recorded_at": "2026-10-21T00:38:03.562618+00:00",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "mode": "unmodified release source",
+  "release": "v1.0.1",
+  "tag_commit": "ceeadec43a69790e6fa3dc11738892841add69b2",
+  "release_url": "https://github.com/arkosom/stasrift/releases/tag/v1.0.1",
+  "source_zip_sha256": "9cf9877c7b346f36ba0eb26bcadb0b6ad3fc0b90cc095f15ae07f5722110c3f9",
+  "cli_sha256": "5335ea086290fd32748f6959c3d615eb74de07a749e29c8677718fd1ea7b1c3a",
+  "shape_baseline_equal": true,
+  "cases": [
+    {
+      "case": "version",
+      "arguments": [
+        "--version"
+      ],
+      "expected_exit": 0,
+      "expected_verdict": null,
+      "exit_code": 0,
+      "verdict": null,
+      "stdout": "stasrift 1.0.1\n",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "case": "valid contract",
+      "arguments": [
+        "validate",
+        "--contract",
+        "inputs/event-time.json"
+      ],
+      "expected_exit": 0,
+      "expected_verdict": null,
+      "exit_code": 0,
+      "verdict": null,
+      "stdout": "VALID\n1 fields checked\n",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "case": "identical declarations",
+      "arguments": [
+        "diff",
+        "--old",
+        "inputs/event-time.json",
+        "--new",
+        "inputs/event-time.json",
+        "--json"
+      ],
+      "expected_exit": 0,
+      "expected_verdict": "UNCHANGED",
+      "exit_code": 0,
+      "verdict": "UNCHANGED",
+      "stdout": "{\n  \"counts\": {\n    \"incompatible\": 0,\n    \"narrowed\": 0,\n    \"unchanged\": 1,\n    \"widened\": 0\n  },\n  \"fields\": [\n    {\n      \"name\": \"occurred_at\",\n      \"verdict\": \"UNCHANGED\"\n    }\n  ],\n  \"verdict\": \"UNCHANGED\"\n}\n",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "case": "same type, changed time meaning",
+      "arguments": [
+        "diff",
+        "--old",
+        "inputs/event-time.json",
+        "--new",
+        "inputs/processing-time.json",
+        "--json"
+      ],
+      "expected_exit": 1,
+      "expected_verdict": "INCOMPATIBLE",
+      "exit_code": 1,
+      "verdict": "INCOMPATIBLE",
+      "stdout": "{\n  \"counts\": {\n    \"incompatible\": 1,\n    \"narrowed\": 0,\n    \"unchanged\": 0,\n    \"widened\": 0\n  },\n  \"fields\": [\n    {\n      \"changes\": [\n        {\n          \"attribute\": \"time_axis\",\n          \"new\": [\n            \"processing_time\"\n          ],\n          \"old\": [\n            \"event_time\"\n          ],\n          \"reason\": \"occurred_at.time_axis changed from {event_time} to {processing_time}; neither version substitutes for the other\",\n          \"verdict\": \"INCOMPATIBLE\"\n        }\n      ],\n      \"name\": \"occurred_at\",\n      \"verdict\": \"INCOMPATIBLE\"\n    }\n  ],\n  \"verdict\": \"INCOMPATIBLE\"\n}\n",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "case": "widened meaning set",
+      "arguments": [
+        "diff",
+        "--old",
+        "inputs/event-time.json",
+        "--new",
+        "inputs/two-time-axes.json",
+        "--json"
+      ],
+      "expected_exit": 1,
+      "expected_verdict": "WIDENED",
+      "exit_code": 1,
+      "verdict": "WIDENED",
+      "stdout": "{\n  \"counts\": {\n    \"incompatible\": 0,\n    \"narrowed\": 0,\n    \"unchanged\": 0,\n    \"widened\": 1\n  },\n  \"fields\": [\n    {\n      \"changes\": [\n        {\n          \"attribute\": \"time_axis\",\n          \"new\": [\n            \"event_time\",\n            \"processing_time\"\n          ],\n          \"old\": [\n            \"event_time\"\n          ],\n          \"reason\": \"occurred_at.time_axis widened from {event_time} to {event_time, processing_time}; consumers may require coordination\",\n          \"verdict\": \"WIDENED\"\n        }\n      ],\n      \"name\": \"occurred_at\",\n      \"verdict\": \"WIDENED\"\n    }\n  ],\n  \"verdict\": \"WIDENED\"\n}\n",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "case": "narrowed meaning set",
+      "arguments": [
+        "diff",
+        "--old",
+        "inputs/two-time-axes.json",
+        "--new",
+        "inputs/event-time.json",
+        "--json"
+      ],
+      "expected_exit": 0,
+      "expected_verdict": "NARROWED",
+      "exit_code": 0,
+      "verdict": "NARROWED",
+      "stdout": "{\n  \"counts\": {\n    \"incompatible\": 0,\n    \"narrowed\": 1,\n    \"unchanged\": 0,\n    \"widened\": 0\n  },\n  \"fields\": [\n    {\n      \"changes\": [\n        {\n          \"attribute\": \"time_axis\",\n          \"new\": [\n            \"event_time\"\n          ],\n          \"old\": [\n            \"event_time\",\n            \"processing_time\"\n          ],\n          \"reason\": \"occurred_at.time_axis narrowed from {event_time, processing_time} to {event_time}; new promise is stronger\",\n          \"verdict\": \"NARROWED\"\n        }\n      ],\n      \"name\": \"occurred_at\",\n      \"verdict\": \"NARROWED\"\n    }\n  ],\n  \"verdict\": \"NARROWED\"\n}\n",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "case": "physical type is outside semantic diff",
+      "arguments": [
+        "diff",
+        "--old",
+        "inputs/event-time.json",
+        "--new",
+        "inputs/physical-type-change.json",
+        "--json"
+      ],
+      "expected_exit": 0,
+      "expected_verdict": "UNCHANGED",
+      "exit_code": 0,
+      "verdict": "UNCHANGED",
+      "stdout": "{\n  \"counts\": {\n    \"incompatible\": 0,\n    \"narrowed\": 0,\n    \"unchanged\": 1,\n    \"widened\": 0\n  },\n  \"fields\": [\n    {\n      \"name\": \"occurred_at\",\n      \"verdict\": \"UNCHANGED\"\n    }\n  ],\n  \"verdict\": \"UNCHANGED\"\n}\n",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "case": "empty contract accepted",
+      "arguments": [
+        "validate",
+        "--contract",
+        "inputs/empty.json"
+      ],
+      "expected_exit": 0,
+      "expected_verdict": null,
+      "exit_code": 0,
+      "verdict": null,
+      "stdout": "VALID\n0 fields checked\n",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "case": "malformed input rejected",
+      "arguments": [
+        "validate",
+        "--contract",
+        "inputs/malformed.json"
+      ],
+      "expected_exit": 2,
+      "expected_verdict": null,
+      "exit_code": 2,
+      "verdict": null,
+      "stdout": "",
+      "stderr": "stasrift: error: invalid JSON in inputs/malformed.json: Expecting value: line 1 column 13 (char 12)\n",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "publication_note": "Only local input paths normalized to portable inputs/ paths; verdicts and exit codes retained."
+}
