@@ -1,0 +1,3 @@
+f7a73c526207cbda3003fc8530ab9eb28efddb761a2e1615eed7521a7853a78c  Stasrift-1.0.1-reproduction.zip
+bcdf21fcccb720ca1844593e9e97a09c9f87302db78c65ed10b917e119c85a3c  run_demo.py
+496d411e9d5b1a638cf0f628594b1fd5537eb7a549314a1c2b9651c8b3792fb3  observed-results.json

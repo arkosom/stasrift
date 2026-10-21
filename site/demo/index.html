@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Reproduce nine observed Stasrift 1.0.1 compatibility checks, including limits and captured outputs."><link rel="canonical" href="https://stasrift.com/demo/"><title>Stasrift 1.0.1 — observed demonstration</title>
+<link rel="stylesheet" href="demo.css">
+<main><p><a href="../">← Stasrift home</a></p><p>Jameson Green · Phase 3 evidence package</p><h1>The type stayed the same.<br>The declared meaning changed.</h1>
+<p>This locally reproduced example uses the unmodified <a href="https://github.com/arkosom/stasrift/releases/tag/v1.0.1">Stasrift 1.0.1 release</a>. It shows a specific check others can repeat.</p>
+<h2>One timestamp, two meanings</h2><pre>Field: occurred_at     Type: timestamp
+Old declaration:      event_time
+New declaration:      processing_time</pre>
+<p>The simple name-and-type baseline sees no structural change. Stasrift returns <strong>INCOMPATIBLE</strong> because the declared time axis changed. These declarations were supplied explicitly; the demonstration does not prove that an implementation follows them.</p>
+<h2>Observed results</h2><table><thead><tr><th>Input or check</th><th>Observed result</th><th>Exit</th></tr></thead><tbody>
+<tr><td>Version</td><td>stasrift 1.0.1</td><td>0</td></tr><tr><td>Valid contract</td><td>Accepted</td><td>0</td></tr>
+<tr><td>Same declarations</td><td>UNCHANGED</td><td>0</td></tr><tr><td>Event → processing time</td><td>INCOMPATIBLE</td><td>1</td></tr>
+<tr><td>Add permitted meaning</td><td>WIDENED</td><td>1</td></tr><tr><td>Remove that meaning</td><td>NARROWED</td><td>0</td></tr>
+<tr><td>Change physical type only</td><td>UNCHANGED</td><td>0</td></tr><tr><td>Empty contract</td><td>Accepted</td><td>0</td></tr><tr><td>Malformed JSON</td><td>Rejected</td><td>2</td></tr>
+</tbody></table><p>All nine expectations matched. Exit 1 is an intended compatibility verdict in these cases.</p>
+<h2>The limits are part of the result</h2><p class="note"><strong>UNCHANGED is not a certificate of correctness.</strong> Physical-type-only changes are outside this semantic diff. Empty contracts are accepted. Meaning that is missing or wrongly declared is not made true by a passing check.</p>
+<p>This is a small source-based run on Windows with Python 3.12.14 and PyYAML 6.0.3. It is not the full release test suite, a performance benchmark, customer validation or independent endorsement.</p>
+<h2>Repeat and challenge it</h2><p><a href="Stasrift-1.0.1-reproduction.zip" download>Download the complete reproduction package (ZIP)</a> · <a href="SHA256SUMS.txt">SHA256 manifest</a></p><p>The package includes the official source, generated inputs, <a href="run_demo.py">the reproduction script</a> and <a href="observed-results.json">captured command output</a>. <a href="READ_ME_FIRST.txt">Read the setup and evidence notes</a>. A new run writes a new results file; copy the folder first to preserve this capture.</p>
+<footer>Prepared October 20, 2026. Published demonstration; locally observed results, not independent validation. No fees incurred.</footer></main></html>
